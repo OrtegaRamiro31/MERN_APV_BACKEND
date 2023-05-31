@@ -20,18 +20,47 @@ const obtenerPacientes = async (req, res) => {
 const obtenerPaciente = async (req, res) => {
   const { id } = req.params;
   const paciente = await Paciente.findById(id);
-
-  console.log(req.params);
-
+  if (!paciente) {
+    return res.status(404).json({ msg: 'No Encontrado' });
+  }
   if (paciente.veterinario._id.toString() !== req.veterinario._id.toString()) {
     return res.json({ msg: 'Acción no válida' });
   }
 
-  if (paciente) {
-    res.json(paciente);
+  res.json(paciente);
+};
+const actualizarPaciente = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const paciente = await Paciente.findById(id);
+    if (!paciente) {
+      return res.status(404).json({ msg: 'No Encontrado' });
+    }
+    if (
+      paciente.veterinario._id.toString() !== req.veterinario._id.toString()
+    ) {
+      return res.json({ msg: 'Acción no válida' });
+    }
+
+    // Actualizar paciente
+    paciente.nombre = req.body.nombre || paciente.nombre;
+    paciente.propietario = req.body.propietario || paciente.propietario;
+    paciente.email = req.body.email || paciente.email;
+    paciente.fecha = req.body.fecha || paciente.fecha;
+    paciente.sintomas = req.body.sintomas || paciente.sintomas;
+
+    try {
+      const pacienteActualizado = await paciente.save();
+      res.json(pacienteActualizado);
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    const e = new Error('Ha ocurrido un error...');
+    return res.json({ msg: e.message });
   }
 };
-const actualizarPaciente = async (req, res) => {};
 const eliminarPaciente = async (req, res) => {};
 
 export {
