@@ -32,8 +32,8 @@ const obtenerPaciente = async (req, res) => {
 const actualizarPaciente = async (req, res) => {
   try {
     const { id } = req.params;
-
     const paciente = await Paciente.findById(id);
+
     if (!paciente) {
       return res.status(404).json({ msg: 'No Encontrado' });
     }
@@ -61,7 +61,30 @@ const actualizarPaciente = async (req, res) => {
     return res.json({ msg: e.message });
   }
 };
-const eliminarPaciente = async (req, res) => {};
+const eliminarPaciente = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const paciente = await Paciente.findById(id);
+
+    if (!paciente) {
+      return res.status(404).json({ msg: 'No Encontrado' });
+    }
+    if (
+      paciente.veterinario._id.toString() !== req.veterinario._id.toString()
+    ) {
+      return res.json({ msg: 'Acción no válida' });
+    }
+
+    try {
+      await paciente.deleteOne();
+      res.json({ msg: 'Paciente eliminado' });
+    } catch (error) {
+      console.log(error);
+    }
+  } catch (error) {
+    res.status(500).json({ msg: 'Error interno del servidor' });
+  }
+};
 
 export {
   agregarPaciente,
